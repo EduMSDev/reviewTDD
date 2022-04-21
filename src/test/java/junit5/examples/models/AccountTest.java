@@ -17,4 +17,11 @@ class AccountTest {
         assertEquals(real, nameToTest);
     }
 
+    @Test
+    void balanceAccountTest() {
+        Account account = new Account("Andres", new BigDecimal("1000.12345"));
+        assertEquals(1000.12345, account.getBalance().doubleValue());
+        assertFalse(account.getBalance().compareTo(BigDecimal.ZERO) < 0);
+    }
+
 }
