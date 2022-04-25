@@ -1,18 +1,36 @@
 package junit5.examples.models;
 
+import junit5.examples.models.exceptions.NotEnoughMoneyException;
+
 import java.math.BigDecimal;
 
 public class Account {
 
+    private Bank bank;
     private String person;
     private BigDecimal balance;
+
     public Account(String person, BigDecimal balance) {
         this.person = person;
         this.balance = balance;
     }
 
+    public Bank getBank() {
+        return bank;
+    }
+
+    public void setBank(Bank bank) {
+        this.bank = bank;
+    }
+
     public void debit(BigDecimal amount) {
-        this.balance = this.balance.subtract(amount);
+        BigDecimal newBalance = this.balance.subtract(amount);
+
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new NotEnoughMoneyException("Not enough money!");
+        }
+
+        this.balance = newBalance;
     }
 
     public void credit(BigDecimal amount) {
