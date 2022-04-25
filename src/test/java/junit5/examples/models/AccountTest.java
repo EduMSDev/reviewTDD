@@ -1,6 +1,8 @@
 package junit5.examples.models;
 
 import junit5.examples.models.exceptions.NotEnoughMoneyException;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -10,12 +12,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class AccountTest {
 
     @Test
+    //Allows to display a description of the name
+    @DisplayName("Testing account name")
+    //Allows you to disable a test
+    @Disabled
     void AccountTestName() {
         Account account = new Account("Andres", new BigDecimal("1000.12345"));
         account.setPerson("Andres");
         String nameToTest = "Andres";
         String real = account.getPerson();
-        assertEquals(real, nameToTest);
+        //A lambda message is passed that is only created if it fails
+        assertEquals(real, nameToTest, () -> "Not can be null");
     }
 
     @Test
