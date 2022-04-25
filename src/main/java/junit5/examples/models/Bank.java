@@ -6,9 +6,8 @@ import java.util.List;
 
 public class Bank {
 
-    private String name;
-
     private final List<Account> accounts;
+    private String name;
 
     public Bank() {
         accounts = new ArrayList<>();

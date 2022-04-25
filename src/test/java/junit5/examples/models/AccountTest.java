@@ -1,15 +1,35 @@
 package junit5.examples.models;
 
 import junit5.examples.models.exceptions.NotEnoughMoneyException;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AccountTest {
+    Account account;
+
+    @BeforeAll
+    static void beforeAll() {
+        System.out.println("Init the test!");
+    }
+
+    @AfterAll
+    static void afterAll() {
+        System.out.println("Finish the test!");
+    }
+
+    @BeforeEach
+    void initMethodTest() {
+        account = new Account("Andres", new BigDecimal("1000.12345"));
+    }
+
+    @AfterEach
+    void tearDown() {
+        System.out.println("Finished Tests!");
+    }
 
     @Test
     //Allows to display a description of the name
@@ -17,7 +37,7 @@ class AccountTest {
     //Allows you to disable a test
     @Disabled
     void AccountTestName() {
-        Account account = new Account("Andres", new BigDecimal("1000.12345"));
+        account = new Account("Andres", new BigDecimal("1000.12345"));
         account.setPerson("Andres");
         String nameToTest = "Andres";
         String real = account.getPerson();
@@ -27,7 +47,7 @@ class AccountTest {
 
     @Test
     void balanceAccountTest() {
-        Account account = new Account("Andres", new BigDecimal("1000.12345"));
+        account = new Account("Andres", new BigDecimal("1000.12345"));
         assertEquals(1000.12345, account.getBalance().doubleValue());
         assertFalse(account.getBalance().compareTo(BigDecimal.ZERO) < 0);
     }
@@ -42,7 +62,7 @@ class AccountTest {
 
     @Test
     void debitAccountTest() {
-        Account account = new Account("Andres", new BigDecimal("1000.12345"));
+        account = new Account("Andres", new BigDecimal("1000.12345"));
         account.debit(new BigDecimal("100"));
         assertNotNull(account.getBalance());
         assertEquals(900, account.getBalance().intValue());
@@ -52,17 +72,16 @@ class AccountTest {
 
     @Test
     void creditAccountTest() {
-        Account account = new Account("Andres", new BigDecimal("1000.12345"));
+        account = new Account("Andres", new BigDecimal("1000.12345"));
         account.credit(new BigDecimal("100"));
         assertNotNull(account.getBalance());
         assertEquals(1100, account.getBalance().intValue());
         assertEquals("1100.12345", account.getBalance().toPlainString());
     }
 
-
     @Test
     void NotEnoughMoneyExceptionTest() {
-        Account account = new Account("Andres", new BigDecimal("1000.12345"));
+        account = new Account("Andres", new BigDecimal("1000.12345"));
         Exception exception = assertThrows(NotEnoughMoneyException.class, () -> {
             account.debit(new BigDecimal(1500));
         });
@@ -95,7 +114,5 @@ class AccountTest {
                 () -> assertEquals("Santander", account1.getBank().getName()),
                 () -> assertEquals("Andres", bank.getAccounts().stream().filter(c -> c.getPerson().equals("Andres")).findFirst().get().getPerson()),
                 () -> assertTrue(bank.getAccounts().stream().anyMatch(c -> c.getPerson().equals("Andres"))));
-
-
     }
 }
