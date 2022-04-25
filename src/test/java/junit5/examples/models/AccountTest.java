@@ -84,9 +84,11 @@ class AccountTest {
         bank.addAccount(account1);
         bank.addAccount(account2);
 
-        assertEquals(2, bank.getAccounts().size());
-        assertEquals("Santander", account1.getBank().getName());
-        assertEquals("Andres", bank.getAccounts().stream().filter(c -> c.getPerson().equals("Andres")).findFirst().get().getPerson());
-        assertTrue(bank.getAccounts().stream().anyMatch(c -> c.getPerson().equals("Andres")));
+        assertAll(() -> assertEquals(2, bank.getAccounts().size()),
+                () -> assertEquals("Santander", account1.getBank().getName()),
+                () -> assertEquals("Andres", bank.getAccounts().stream().filter(c -> c.getPerson().equals("Andres")).findFirst().get().getPerson()),
+                () -> assertTrue(bank.getAccounts().stream().anyMatch(c -> c.getPerson().equals("Andres"))));
+
+
     }
 }
