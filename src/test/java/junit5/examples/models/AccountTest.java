@@ -2,10 +2,15 @@ package junit5.examples.models;
 
 import junit5.examples.models.exceptions.NotEnoughMoneyException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.*;
 
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AccountTest {
@@ -110,9 +115,88 @@ class AccountTest {
         bank.addAccount(account1);
         bank.addAccount(account2);
 
-        assertAll(() -> assertEquals(2, bank.getAccounts().size()),
-                () -> assertEquals("Santander", account1.getBank().getName()),
-                () -> assertEquals("Andres", bank.getAccounts().stream().filter(c -> c.getPerson().equals("Andres")).findFirst().get().getPerson()),
-                () -> assertTrue(bank.getAccounts().stream().anyMatch(c -> c.getPerson().equals("Andres"))));
+        assertAll(() -> assertEquals(2, bank.getAccounts().size()), () -> assertEquals("Santander", account1.getBank().getName()), () -> assertEquals("Andres", bank.getAccounts().stream().filter(c -> c.getPerson().equals("Andres")).findFirst().get().getPerson()), () -> assertTrue(bank.getAccounts().stream().anyMatch(c -> c.getPerson().equals("Andres"))));
+    }
+
+    @Test
+    @EnabledOnOs(OS.WINDOWS)
+    void windowsTest() {
+    }
+
+    @Test
+    @EnabledOnOs({OS.LINUX, OS.MAC})
+    void linuxMacTest() {
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    void noWindowsTest() {
+    }
+
+    @Test
+    @EnabledOnJre(JRE.JAVA_8)
+    void jdk8() {
+    }
+
+    @Test
+    @DisabledOnJre(JRE.JAVA_8)
+    void noJdk8() {
+    }
+
+
+    @Test
+    void showSystemProperties() {
+        Properties properties = System.getProperties();
+        properties.forEach((k, v) -> System.out.println(k + ": " + v));
+    }
+
+    @Test
+    @EnabledIfSystemProperty(named = "java.version", matches = "1.8.0_281")
+    void systemPropertiesTest() {
+
+    }
+
+    @Test
+    @DisabledIfSystemProperty(named = "sun.arch.data.model", matches = ".*64*.")
+    void systemPropertiesOSTest() {
+
+    }
+
+    @Test
+    void showEnvironmentsVariables() {
+        Map<String, String> env = System.getenv();
+        env.forEach((k, v) -> System.out.println(k + ": " + v));
+    }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "JAVA_HOME", matches = ".*jdk1.8.0_281.*")
+    void environmentVariableTest() {
+    }
+
+    @Test
+    @DisabledIfEnvironmentVariable(named = "JAVA_HOME", matches = ".*jdk1.8.0_281.*")
+    void noEnvironmentVariableTest() {
+    }
+
+    @Test
+    void balanceAccountTestDev() {
+        boolean isDev = "DEV".equals(System.getenv("env"));
+
+        assumeTrue(isDev);
+        account = new Account("Andres", new BigDecimal("1000.12345"));
+        assertEquals(1000.12345, account.getBalance().doubleValue());
+        assertFalse(account.getBalance().compareTo(BigDecimal.ZERO) < 0);
+    }
+
+    @Test
+    void balanceAccountTestDev2() {
+        boolean isDev = "DEV".equals(System.getenv("env"));
+
+        assumingThat(isDev, () -> {
+            account = new Account("Andres", new BigDecimal("1000.12345"));
+            assertEquals(1000.12345, account.getBalance().doubleValue());
+            assertFalse(account.getBalance().compareTo(BigDecimal.ZERO) < 0);
+        });
+
     }
 }
