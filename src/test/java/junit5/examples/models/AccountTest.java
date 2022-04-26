@@ -65,8 +65,13 @@ class AccountTest {
         assertNotEquals(account, account2);
     }
 
-    @Test
-    void debitAccountTest() {
+    @DisplayName("Testing debit account function")
+    @RepeatedTest(value = 5, name = "number {currentRepetition} of {totalRepetitions}")
+    void debitAccountTest(RepetitionInfo repetitionInfo) {
+        if (repetitionInfo.getCurrentRepetition() == 3) {
+            System.out.println("Its the third repetition!");
+        }
+
         account = new Account("Andres", new BigDecimal("1000.12345"));
         account.debit(new BigDecimal("100"));
         assertNotNull(account.getBalance());
@@ -119,21 +124,6 @@ class AccountTest {
     }
 
     @Test
-    @EnabledOnOs(OS.WINDOWS)
-    void windowsTest() {
-    }
-
-    @Test
-    @EnabledOnOs({OS.LINUX, OS.MAC})
-    void linuxMacTest() {
-    }
-
-    @Test
-    @DisabledOnOs(OS.WINDOWS)
-    void noWindowsTest() {
-    }
-
-    @Test
     @EnabledOnJre(JRE.JAVA_8)
     void jdk8() {
     }
@@ -141,51 +131,6 @@ class AccountTest {
     @Test
     @DisabledOnJre(JRE.JAVA_8)
     void noJdk8() {
-    }
-
-
-    @Test
-    void showSystemProperties() {
-        Properties properties = System.getProperties();
-        properties.forEach((k, v) -> System.out.println(k + ": " + v));
-    }
-
-    @Test
-    @EnabledIfSystemProperty(named = "java.version", matches = "1.8.0_281")
-    void systemPropertiesTest() {
-
-    }
-
-    @Test
-    @DisabledIfSystemProperty(named = "sun.arch.data.model", matches = ".*64*.")
-    void systemPropertiesOSTest() {
-
-    }
-
-    @Test
-    void showEnvironmentsVariables() {
-        Map<String, String> env = System.getenv();
-        env.forEach((k, v) -> System.out.println(k + ": " + v));
-    }
-
-    @Test
-    @EnabledIfEnvironmentVariable(named = "JAVA_HOME", matches = ".*jdk1.8.0_281.*")
-    void environmentVariableTest() {
-    }
-
-    @Test
-    @DisabledIfEnvironmentVariable(named = "JAVA_HOME", matches = ".*jdk1.8.0_281.*")
-    void noEnvironmentVariableTest() {
-    }
-
-    @Test
-    void balanceAccountTestDev() {
-        boolean isDev = "DEV".equals(System.getenv("env"));
-
-        assumeTrue(isDev);
-        account = new Account("Andres", new BigDecimal("1000.12345"));
-        assertEquals(1000.12345, account.getBalance().doubleValue());
-        assertFalse(account.getBalance().compareTo(BigDecimal.ZERO) < 0);
     }
 
     @Test
@@ -199,4 +144,74 @@ class AccountTest {
         });
 
     }
+
+    @Nested
+    class OperativeSystemTest {
+        @Test
+        @EnabledOnOs(OS.WINDOWS)
+        void windowsTest() {
+        }
+
+        @Test
+        @EnabledOnOs({OS.LINUX, OS.MAC})
+        void linuxMacTest() {
+        }
+
+        @Test
+        @DisabledOnOs(OS.WINDOWS)
+        void noWindowsTest() {
+        }
+    }
+
+    @Nested
+    class EnvironmentVariablesTest {
+        @Test
+        void showEnvironmentsVariables() {
+            Map<String, String> env = System.getenv();
+            env.forEach((k, v) -> System.out.println(k + ": " + v));
+        }
+
+        @Test
+        @EnabledIfEnvironmentVariable(named = "JAVA_HOME", matches = ".*jdk1.8.0_281.*")
+        void environmentVariableTest() {
+        }
+
+        @Test
+        @DisabledIfEnvironmentVariable(named = "JAVA_HOME", matches = ".*jdk1.8.0_281.*")
+        void noEnvironmentVariableTest() {
+        }
+
+        @Test
+        void balanceAccountTestDev() {
+            boolean isDev = "DEV".equals(System.getenv("env"));
+
+            assumeTrue(isDev);
+            account = new Account("Andres", new BigDecimal("1000.12345"));
+            assertEquals(1000.12345, account.getBalance().doubleValue());
+            assertFalse(account.getBalance().compareTo(BigDecimal.ZERO) < 0);
+        }
+
+    }
+
+    @Nested
+    class SystemPropertiesTest {
+        @Test
+        void showSystemProperties() {
+            Properties properties = System.getProperties();
+            properties.forEach((k, v) -> System.out.println(k + ": " + v));
+        }
+
+        @Test
+        @EnabledIfSystemProperty(named = "java.version", matches = "1.8.0_281")
+        void systemPropertiesTest() {
+
+        }
+
+        @Test
+        @DisabledIfSystemProperty(named = "sun.arch.data.model", matches = ".*64*.")
+        void systemPropertiesOSTest() {
+
+        }
+    }
+
 }
