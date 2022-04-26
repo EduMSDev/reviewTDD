@@ -3,6 +3,8 @@ package junit5.examples.models;
 import junit5.examples.models.exceptions.NotEnoughMoneyException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -77,7 +79,6 @@ class AccountTest {
         assertNotNull(account.getBalance());
         assertEquals(900, account.getBalance().intValue());
         assertEquals("900.12345", account.getBalance().toPlainString());
-
     }
 
     @Test
@@ -145,7 +146,19 @@ class AccountTest {
 
     }
 
+    @ParameterizedTest(name = "Number {index} with {0} -{argumentsWithNames}")
+    @ValueSource(strings = {"100", "200", "300"})
+    void debitAccountParametrizedTest(String amount) {
+        account = new Account("Andres", new BigDecimal("1000.12345"));
+        account.debit(new BigDecimal(amount));
+        assertNotNull(account.getBalance());
+        assertTrue(account.getBalance().compareTo(BigDecimal.ZERO) > 0);
+    }
+
+
+    @Tag("Operative System Test")
     @Nested
+            //allows nesting the tests to have the tests more ordered
     class OperativeSystemTest {
         @Test
         @EnabledOnOs(OS.WINDOWS)
@@ -213,5 +226,4 @@ class AccountTest {
 
         }
     }
-
 }
