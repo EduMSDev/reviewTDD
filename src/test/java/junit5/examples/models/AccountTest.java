@@ -7,8 +7,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -17,6 +19,8 @@ import static org.junit.jupiter.api.Assumptions.assumingThat;
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AccountTest {
     Account account;
+    private TestInfo testInfo;
+    private TestReporter testReporter;
 
     @BeforeAll
     static void beforeAll() {
@@ -29,8 +33,13 @@ class AccountTest {
     }
 
     @BeforeEach
-    void initMethodTest() {
+    void initMethodTest(TestInfo testInfo, TestReporter testReporter) {
+        this.testInfo = testInfo;
+        this.testReporter = testReporter;
         account = new Account("Andres", new BigDecimal("1000.12345"));
+        testReporter.publishEntry("Executing: " + testInfo.getDisplayName() + ", " + testInfo.getTestMethod().get().getName() + " with" +
+                " tags " + testInfo.getTags());
+
     }
 
     @AfterEach
@@ -43,7 +52,7 @@ class AccountTest {
     @DisplayName("Testing account name")
     //Allows you to disable a test
     @Disabled
-    void AccountTestName() {
+    void AccountTestName(TestReporter testReporter) {
         account = new Account("Andres", new BigDecimal("1000.12345"));
         account.setPerson("Andres");
         String nameToTest = "Andres";
@@ -225,5 +234,31 @@ class AccountTest {
         void systemPropertiesOSTest() {
 
         }
+
+    }
+
+    @Nested
+    @Tag("timeout")
+    class timeoutExampleTest {
+        @Test
+        @Timeout(5)
+        void timeoutTest() throws InterruptedException {
+            TimeUnit.SECONDS.sleep(6);
+        }
+
+        @Test
+        @Timeout(value = 500, unit = TimeUnit.MILLISECONDS)
+        void timeoutTest2() throws InterruptedException {
+            TimeUnit.MILLISECONDS.sleep(1100);
+        }
+
+        @Test
+        void testTimeAssertion() {
+            assertTimeout(Duration.ofSeconds(5), () -> {
+                TimeUnit.MILLISECONDS.sleep(5500);
+            });
+        }
+
+
     }
 }
