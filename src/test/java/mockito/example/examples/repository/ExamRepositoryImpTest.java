@@ -25,10 +25,10 @@ class ExamRepositoryImpTest {
     ExamServiceImp examServices;
 
     @Mock
-    ExamRepository repository;
+    ExamRepositoryImp repository;
 
     @Mock
-    QuestionRepository questionRepository;
+    QuestionRepositoryImpl questionRepository;
 
     @Captor
     ArgumentCaptor<Long> captor;
@@ -205,6 +205,66 @@ class ExamRepositoryImpTest {
         assertEquals("Fisica", exam.getName());
         verify(repository).saveExam(any(Exam.class));
         verify(questionRepository).saveQuestions(anyList());
+    }
+
+    @Test
+    void doCallRealMethod() {
+        when(repository.findAll()).thenReturn(EXAMS);
+        //when(questionRepository.findQuestionByExamId(anyLong())).thenReturn(QUESTIONS);
+        Mockito.doCallRealMethod().when(questionRepository).findQuestionByExamId(anyLong());
+        Exam exam = examServices.findExamByNameWithQuestions("Matematicas");
+        assertEquals(5L, exam.getId());
+        assertEquals("Matematicas", exam.getName());
+    }
+
+
+    @Test
+    void spyTest() {
+        ExamRepository examRepository = spy(ExamRepositoryImp.class);
+        QuestionRepository questionRepository = spy(QuestionRepositoryImpl.class);
+        ExamServices examServices = new ExamServiceImp(examRepository, questionRepository);
+
+        Exam exam = examServices.findExamByNameWithQuestions("Matematicas");
+        assertEquals(5, exam.getId());
+        assertEquals("Matematicas", exam.getName());
+        assertEquals(5, exam.getQuestions().size());
+        assertTrue(exam.getQuestions().contains("Aritmetica"));
+    }
+
+    @Test
+    void orderInvocationTest() {
+        when(repository.findAll()).thenReturn(EXAMS);
+        examServices.findExamByNameWithQuestions("Matematicas");
+        examServices.findExamByNameWithQuestions("Lengua");
+
+        InOrder inOrder = inOrder(questionRepository);
+        inOrder.verify(questionRepository).findQuestionByExamId(5L);
+        inOrder.verify(questionRepository).findQuestionByExamId(6L);
+    }
+
+    @Test
+    void orderInvocationTest2() {
+        when(repository.findAll()).thenReturn(EXAMS);
+        examServices.findExamByNameWithQuestions("Matematicas");
+        examServices.findExamByNameWithQuestions("Lengua");
+
+        InOrder inOrder = inOrder(repository, questionRepository);
+        inOrder.verify(repository).findAll();
+        inOrder.verify(repository).findAll();
+        inOrder.verify(questionRepository).findQuestionByExamId(5L);
+        inOrder.verify(questionRepository).findQuestionByExamId(6L);
+    }
+
+    @Test
+    void numberInvocationsTests() {
+        when(repository.findAll()).thenReturn(EXAMS);
+        examServices.findExamByNameWithQuestions("Matematicas");
+
+        verify(questionRepository, times(1)).findQuestionByExamId(5L);
+        verify(questionRepository, atLeast(1)).findQuestionByExamId(5L);
+        verify(questionRepository, atLeastOnce()).findQuestionByExamId(5L);
+        verify(questionRepository, atMost(10)).findQuestionByExamId(5L);
+        verify(questionRepository, atMostOnce()).findQuestionByExamId(5L);
     }
 
     public static class MiArgsMatchers implements ArgumentMatcher<Long> {
